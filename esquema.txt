@@ -1,0 +1,17 @@
+BatControle:
+	Envia dados UDP c/ frequência para um IP e Porta.
+
+
+BatMovel:
+	Recebe dados UDP e faz controle do carrinho
+
+
+BatEstacao:
+	Verifica sensores e faz requisições para o backend
+
+BatWeb:
+	Frontend:
+		Pega informações do backend e as mostra
+	Backend:
+		Faz log de informações e as envia se necessário para o frontend
+		NODE.JS
