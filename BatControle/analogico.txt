@@ -1,0 +1,15 @@
+Valores lidos no analogRead com 5V
+
+EIXO X:
+  esquerda ->   0
+  centro   ->   400
+  direita  ->   900
+
+EIXO Y:
+  cima   ->   0
+  centro ->   512
+  baixo  ->   1024
+
+BOTÃO
+  apertado -> 0
+  solto    -> 300 - 450

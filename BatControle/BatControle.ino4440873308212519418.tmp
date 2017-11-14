@@ -1,0 +1,115 @@
+#include <SPI.h>
+#include <WiFi.h>
+#include <WiFiUdp.h>
+
+#define DEBUG
+
+#define MAX_ATTEMPTS_WIFI_CONNECTION 1
+
+#define ERROR_LED 7
+
+char ssid[] = "raul-wifi-network";
+char pass[] = "Aw1f1p@$$w0rd";
+int keyIndex = 0;
+unsigned int localPort = 2390;
+
+char packetBuffer[255];
+char  ReplyBuffer[] = "acknowledged";
+
+int status = WL_IDLE_STATUS;
+WiFiUDP Udp;
+WiFiClient client;
+
+void blink(int pin,int times,int delayTime,int endTime){
+  int i;
+  for(i=0;i<times;i++){
+    digitalWrite(pin,HIGH);
+    delay(delayTime);
+    digitalWrite(pin,LOW);
+    delay(delayTime);
+  }
+  delay(endTime);
+}
+
+void setup() {
+  #ifdef DEBUG
+    Serial.begin(9600);
+  #endif
+  pinMode(ERROR_LED,OUTPUT);
+
+  if (WiFi.status() == WL_NO_SHIELD) {
+    #ifdef DEBUG  
+      Serial.println("WIFI SHIELD NOT CONNECTED");
+    #endif
+    while(true) blink(ERROR_LED,1,500,2000);
+  }
+  int attemp = 0;
+  while (status != WL_CONNECTED) {
+    if(attemp==MAX_ATTEMPTS_WIFI_CONNECTION){
+      #ifdef DEBUG  
+        Serial.println("CAN'T CONNECT TO WIFI NETWORK");
+      #endif
+      while(true) blink(ERROR_LED,2,500,2000);
+    }
+    Serial.print("Attempting to connect to SSID: ");
+    Serial.println(ssid);
+    status = WiFi.begin(ssid, pass);
+    attemp++;
+    delay(10000);
+  }
+  Serial.println("Connected to wifi");
+  printWifiStatus();
+
+    Udp.begin(localPort);
+}
+
+void loop() {
+  // if there's data available, read a packet
+  int packetSize = Udp.parsePacket();
+  if (packetSize) {
+    Serial.print("Received packet of size ");
+    Serial.println(packetSize);
+    Serial.print("From ");
+    IPAddress remoteIp = Udp.remoteIP();
+    Serial.print(remoteIp);
+    Serial.print(", port ");
+    Serial.println(Udp.remotePort());
+
+    // read the packet into packetBufffer
+    int len = Udp.read(packetBuffer, 255);
+    if (len > 0) {
+      packetBuffer[len] = 0;
+    }
+    Serial.println("Contents:");
+    Serial.println(packetBuffer);
+
+    // send a reply, to the IP address and port that sent us the packet we received
+    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
+    Udp.write(ReplyBuffer);
+    Udp.endPacket();
+  }
+}
+
+
+void printWifiStatus() {
+  // print the SSID of the network you're attached to:
+  Serial.print("SSID: ");
+  Serial.println(WiFi.SSID());
+
+  // print your WiFi shield's IP address:
+  IPAddress ip = WiFi.localIP();
+  Serial.print("IP Address: ");
+  Serial.println(ip);
+
+  // print the received signal strength:
+  long rssi = WiFi.RSSI();
+  Serial.print("signal strength (RSSI):");
+  Serial.print(rssi);
+  Serial.println(" dBm");
+}
+
+
+
+
+
+
